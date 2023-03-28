@@ -1,0 +1,83 @@
+#+TITLE: Software Requirements
+#+SUBTITLE: Audible-Plot
+#+AUTHOR: Daniel Birket
+#+LATEX_HEADER: \usepackage[margin=1.0in]{geometry}
+#+LATEX_HEADER: \usepackage{parskip}
+#+OPTIONS: toc:nil
+#+STARTUP: overview
+#+begin_abstract
+This document specifies the requirements of a python module the
+supports "plotting" simple data series as audible speech and tones,
+together with a visual plot of the same data, with particular
+attention to accessibility by visually-impaired and blind users.
+#+end_abstract
+
+* Introduction
+* Project Goals
+
+The purpose of this project goes beyond the creation of a python
+module to audibly "plot" data. The project should also:
+
+- Provide the contributors with practice programming in the "Python"
+  language, including using libraries for:
+  - Text to Speech
+  - Audio synthesis
+- Provide experience in designing and implementing an accessible program
+  and web site about that program.
+- Provide experience using software design tools, including:
+  - Git version control
+  - Static web site tools
+  - Code documentation
+  - Software Testing
+- Provide an public repository for a professional résumé.
+
+* Module Requirements
+
+The software module must meet the following requirements:
+
+- It must be suitable to the study of Algebra by blind and low-vision
+  students for whom the traditional manual and automated "graphing" of
+  linear and polynomial functions is not instructive. (This is the
+  use-case that prompted this project.)
+
+- It must be written primarily in the "Python" programming language,
+  as that language is well suited to both learning and production of a
+  professional product and is compatible with a range of platforms.
+  
+- It must be open-source with a copy-left license.
+
+- It must be well and accessibly documented, so that others and blind
+  users in particular may benefit from it.
+
+- It must have a professional and high-quality appearance, to be
+  usable as a résumé portfolio reference.
+
+- It must be compatible with Linux/Unix platforms, including
+  particularly MacOS and Raspberry Pi, the platforms used by the
+  initial contributors.
+
+- It must rely only on historically and currently well-maintained
+  dependencies to avoid becoming unusable due to broken dependencies
+  so as to remain useful to others longer.
+
+  Recommendations [2023-03-28 Tue]:
+  
+  - Current stable Python language: 3.11.2 at https://python.org
+    
+  - Gnuplot 5.4.6 at http://gnuplot.info
+    
+    - I suggest writing gnuplot scripts directly and shelling out (or
+      piping) to run them, instead of using an available python wrapper,
+      as wrappers are less likely to be maintained than gnuplot itself.
+
+  - Pandoc 3.1.2 at https://pandoc.org
+
+- It must be usable with and without a "screen reader".
+
+- It should produce graphical, plain-text and audio representations of the
+  data and metadata.
+  - I suggest 'pandoc markdown' format plain-text output of the metadata
+    (title, axis labels, ranges, etc) and tabular data as it easily
+    readable with a screen-reader or a text-to-speech engine, plus it is
+    readily convertible into HTML, PDF and other formats for sighted
+    users, and can embed graphics and links to audio files.
