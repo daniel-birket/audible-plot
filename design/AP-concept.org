@@ -8,6 +8,7 @@
 #+begin_abstract
 This document outlines the concept for the software design.
 #+end_abstract
+* General Concept
 The software design concept is to leverage existing well-documented
 and currently maintained open-source tools to produce a hybrid audible
 and visual rendering of a data series and associated descriptive text
@@ -41,26 +42,54 @@ file, and the LaTeX file are all simple text files, which are
 inherently blind-accessible. The final outputs of HTML or PDF files
 are also blind-accessible.
 
-# Theory of Operation
+* Theory of Operation
 
-The Audible Plot module has three main phases of operation: describe, play, and
-plot.
+The Audible Plot module has three main groups of methods: describe, play, and
+plot. First, the describe methods are used to describe the plot, then
+either the play or plot methods (or both) are used to output the plot.
+The application may call the plot command before the play command to
+both 'plot' the data to a document and then 'play' the data to the user.
+
+** Description Methods
 
 Several audible-plot methods allow the programmer to describe the plot
-and provide the data to be plotted. These descriptive calls are
+and provide the data to be plotted. These descriptive methods are
 outlined below.
+
+- 
+
+** Play Method
 
 The `play` method synthesizes a collection of speech and audio tone
 samples to present to a listening user. The information presented at
-the moment is controlled by pressing keys. For example: 't' to speak
-the title, 'a', 'b', or 'c' to select the 1st, 2nd or 3rd data series
-and repeat the last tone or speech output with the new selection, 'p'
-to speak the current x and y position, 'x' and 'y' to describe the
-x-axis and y-axis, 'd' to speak the plot description. back-quote, '1',
-'2', through '0' to move to the 0%, 10%, 20% through 100% positions on
-the x-axis. Left and Right arrow keys to move the current x-axis
-position higher or lower. Down arrow to play the current position
-again. 'q' to quit the player. These keys are tabulated below.
+the moment is controlled by pressing keys. These keys are tabulated
+below.
+
+- d : speak the plot title and description
+- x : speak the x-axis label and range
+- y : speak the y-axis label and range
+- f : speak the current function's label
+- l : speak the entire legend of function letters and labels
+- a, b, c : select function a, b, or c and either speak its label and
+  current x/y position or play its tone (based on the most recently
+  output: speech or tone.)
+- up arrow: select the next function
+- down arrow: select the previous function
+- t : play the tone for the current function and point
+- s : speak the x and y position of the current data point
+- space : re-speak the x and y position or re-play the tone for the current
+  data point (depending on most recent usage, speech or tone)
+- left arrow : move to the previous data point and either speak its
+  x/y position or play its tone.
+- right arrow : move to next data point and either speak its x/y
+  position or play its tone.
+- tilda - move to the 0% position on the x axis and speak or play that
+  data.
+- 1, 2, through 9, 0 : move the the 10%, 20%, 90%, or 100% position on
+  the x-axis and speak or play that data.
+- q : quit the player
+
+** Plot Method
 
 The `plot` method synthesizes complete speech description and audio
 tone sound files to represent the entire plot. It also creates a
@@ -68,13 +97,10 @@ visual plot using `gnuplot` and a HTML or PDF file using markdown and
 `pandoc`. The resulting file includes both a visual and audible
 representation of the plot.
 
-The application may call the plot command before the play command to
-both 'plot' the data to a document and then 'play' the data to the user.
-
 The `plot` method operates as described below and illustrated in
 the following diagram:
 
-#+begin_src dot :file AP-concept-flow.png :export results
+#+begin_src dot :file AP-concept-flow.png
   digraph flow {
       node [shape=box color=blue]
       Python_App
