@@ -87,7 +87,14 @@ below.
   data.
 - 1, 2, through 9, 0 : move the the 10%, 20%, 90%, or 100% position on
   the x-axis and speak or play that data.
+- i : prompt for the X-axis interval between left-right arrow steps.
+- Y : y-zoom. Prompt for new range for y-axis tones, default 2X zoom
+  around point.
+- X : x-zoom. Prompt for new range for x-axis interval, default 2X
+  zoom around point.
 - q : quit the player
+
+Screen reader key conventions should be considered for these.
 
 ** Plot Method
 
@@ -170,6 +177,37 @@ the following diagram:
     image, meta-data speech audio and plot audio into one document.
   - Shells out to `pandoc` to create either an HTML document or a PDF[fn:1]
     document, as requested.
+
+* Thoughts on Scaling
+
+Lawrence had some excellent ideas concerning scaling of data to
+audio. In short, we should scale the data to the scale of musical
+notes, not to frequencies. Humans, particularly musicians or
+non-tone-deaf people, perceive the notes of a piano keyboard as a
+linear progression, despite it actually being an exponential
+progression of frequency.
+
+I suggest that we use the intervals of (12 semitones/octave) X (8
+octaves) = (96 semitones), a total of 97 notes from C1 to C9, MIDI 24
+to MIDI 120, inclusive, to represent the full "vertical" range of the
+plot. All those frequencies are audible, although the highest few are a bit
+squeaky and might be prone to aliasing at a sample rate of 44100
+Hertz.
+
+[2023-03-29 Wed 14:59] Lawrence says that 8 octaves is excessive and
+suggests 3 octaves. I suggested 5 octaves, 60 semitones, or an octave
+more range than a standard keyboard. 4 octaves might be good, 48
+intervals or about 2% of range per note.
+
+More generally, though, we should allow the user to request a range
+of notes, even allowing them to express the notes as a
+musical note and octave (like "A4") or as a MIDI note number. They
+should also be able to express what data values map to these limits
+conveniently, possibly multiple ways.
+
+I imagine using python's managed properties (automatic getter and
+setter methods) to handle conversions between MIDI number, musical
+note and frequency.
 
 * Footnotes
 
