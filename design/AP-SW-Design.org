@@ -28,7 +28,7 @@ extend the class "object", not "float".
 The frequency corresponding to any pitch can be computed with the formula:
 
 #+begin_math
-f = 440 * 2^{m-69}
+f = 440 * 2^{(m-69)/12}
 #+end_math
 Where:
 - f: frequency in hertz
@@ -37,20 +37,20 @@ Where:
 or in python:
 
 #+begin_src python
-  freq = 440.0 * 2.0^(midi - 69.0)*
+  freq = 440.0 * 2.0^((midi - 69.0)/12)
 #+end_src
 
 In the other direction, the float midi note may be calculated by
 inverting the same equation:
 
 #+begin_math
-m = log_{2}(f / 440) + 69
+m = 12 * log_{2}(f / 440) + 69
 #+end_math
 
 or in python:
 
 #+begin_src python
-  midi = math.log2(freq / 440.0) + 69.0
+  midi = 12.0 * math.log2(freq / 440.0) + 69.0
 #+end_src
 
 When converting from a string to a MIDI note, the string should be of
@@ -128,8 +128,10 @@ if the string is a valid integer or float number in the range greater
 than or equal to 12 and less than 128 and interpret a number in that
 range as a float MIDI number.
 
-If the string is empty, the pitch should initialize to "A4", a 440 Hz
-'A' note.
+If the string is empty, or the integer is 0, or the float is 0.0, the
+pitch should initialize to "A4", a 440 Hz 'A' note.
+
+If the string or integer or float is negative, it should raise a ValueError.
 
 Finally, if the string is a valid integer or float greater than or
 equal to 128 and less than or equal to 22000, it should interpret the
