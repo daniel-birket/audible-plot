@@ -162,9 +162,11 @@ The __init__ initializer should also accept this tuple.
 The class Pitch must have the following interface:
 
 #+begin_src python
+  from typing import Any
+
   class Pitch(object):
 
-      def __init__(value : Any = None) -> None:
+      def __init__(self, value : Any = None) -> None:
 	  pass
 	  if isinstance(value, tuple) or isinstance(value, str):
 	      self.note = value
@@ -220,7 +222,7 @@ The class Pitch must have the following interface:
 	  return "A4"
 
       @note.setter
-      def note(self, n: Any) -> None:
+      def note(self, n) -> None:
 	  if isinstance(n, tuple):
 	      note_str, note_bend = n # unpack tuple
 	  elif isinstance(n, str):
