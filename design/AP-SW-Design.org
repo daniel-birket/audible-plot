@@ -1,6 +1,7 @@
 #+TITLE: Software Design
 #+SUBTITLE: Audible-Plot
-#+AUTHOR: Daniel Birket
+#+AUTHOR: Daniel Birket &
+#+AUTHOR: Lawrence Perez
 #+LATEX_HEADER: \usepackage[margin=1.0in]{geometry}
 #+LATEX_HEADER: \usepackage{parskip}
 #+OPTIONS: toc:nil
@@ -30,6 +31,7 @@ The frequency corresponding to any pitch can be computed with the formula:
 #+begin_math
 f = 440 * 2^{(m-69)/12}
 #+end_math
+
 Where:
 - f: frequency in hertz
 - m: MIDI note number, as a float
@@ -144,10 +146,10 @@ If the string is neither a valid note name or a number in one of the
 valid ranges for a MIDI note or an audible frequency, it should raise
 a ValueError.
 
-If the initializer is not a string, integer or float, or another
+If the initializer is not a string, integer or float, note tuple, or another
 Pitch, it should raise a TypeError.
 
-Except for the __init__ initializer, which detects the format of the
+Except for the dunder init initializer, which detects the format of the
 pitch, Pitch should provide a property() interface to note, midi and
 freq fields, with getter and setter methods and doc strings.
 
@@ -159,16 +161,16 @@ string represents the integer part of the float MIDI number. The
 second item of the tuple must be the fractional part of the MIDI
 number, a float number greater than or equal to 0.0 and less than 1.0.
 
-The __init__ initializer should also accept this tuple.
+The dunder init initializer should also accept this tuple.
 
 The class Pitch must have the following interface:
 
 #+begin_src python
   from typing import Any
 
-  class Pitch(object):
 
-      def __init__(self, value : Any = None) -> None:
+  class Pitch(object):
+      def __init__(self, value: Any = None) -> None:
 	  pass
 	  if isinstance(value, tuple) or isinstance(value, str):
 	      self.note = value
@@ -197,8 +199,7 @@ The class Pitch must have the following interface:
 
       @midi.deleter
       def midi(self) -> None:
-	  self._midi = 69.0         # "A4", 440 Hz 'A'
-
+	  self._midi = 69.0  # "A4", 440 Hz 'A'
 
       # Getter and Setter of frequency
       @property
@@ -216,17 +217,16 @@ The class Pitch must have the following interface:
       def freq(self) -> None:
 	  del self.midi
 
-
       # Getter and Setter of note string
       @property
-      def note(self) -> str:
-	  "note string of pitch."
-	  return "A4"
+      def note(self) -> tuple:
+	  "pitch as tuple of note string and fractional note."
+	  return ("A4", 0.0)
 
       @note.setter
       def note(self, n) -> None:
 	  if isinstance(n, tuple):
-	      note_str, note_bend = n # unpack tuple
+	      note_str, note_bend = n  # unpack tuple
 	  elif isinstance(n, str):
 	      note_str = n
 	      note_bend = 0.0

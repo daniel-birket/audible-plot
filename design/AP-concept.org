@@ -1,6 +1,7 @@
 #+TITLE: Software Design Concept
 #+SUBTITLE: Audible-Plot
-#+AUTHOR: Daniel Birket
+#+AUTHOR: Daniel Birket &
+#+AUTHOR: Lawrence Perez
 #+LATEX_HEADER: \usepackage[margin=1.0in]{geometry}
 #+LATEX_HEADER: \usepackage{parskip}
 #+OPTIONS: toc:nil
