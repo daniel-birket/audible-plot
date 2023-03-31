@@ -17,6 +17,21 @@ class Pitch(object):
         # if isinstance(value, int) or isinstance(value, float)
         # midi = 0
 
+    # Convertion Functions
+
+    def freq2midi(type, value):
+        """Converts a frequency to.a MIDI note, and a MIDI note to a frequency in HZ based on the type.
+        The type can be either 'f' frequency or 'm' MIDI note number.
+        Returns: Calculated result"""
+
+        pass # Will finish this later.
+
+    def note2midi(type, value):
+        Converts a note to MIDI and back.
+        Excepted types are 'n' note and 'm' MIDI note.
+        Will not except a frequency, this must be converted to a note first.
+        Returns: The calculated result: either str or tuple when returning the note, or float for converting to a MIDI note."""
+        notes_dict = {'c':0, 'd':2, 'e':4, 'f': 5, 'G': 7 , 'A': 9, 'B':11}
     # Getter and Setter of midi (same as internal _midi)
     @property
     def midi(self) -> float:
@@ -76,6 +91,8 @@ class Pitch(object):
     @note.deleter
     def note(self) -> None:
         del self.midi
+
+
 
     def update(type, value):
         """Updates all other class variables depending on the type that is sent to this method.
