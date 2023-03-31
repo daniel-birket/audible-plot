@@ -7,9 +7,9 @@ MIDI_MIN: int = 12
 MIDI_MAX: int = 128
 MIDI_C3: int = 48
 
-FREQ_A440: float = 440.0
+FREQ_A440: int = 440
 
-NOTES_PER_OCT: float = 12.0
+NOTES_PER_OCT: int = 12
 
 NOTE_A440: str = "A4"
 NOTE_LETTERS = "CDEFGAB"
