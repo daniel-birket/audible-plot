@@ -1,21 +1,8 @@
+"""Temporary module to document the Pitch class"""
 from typing import Any
 
 
 class Pitch(object):
-    def __init__(self, value: Any = None) -> None:
-        pass
-        if isinstance(value, tuple) or isinstance(value, str):
-            self.note = value
-        elif isinstance(value, float) or isinstance(value, int):
-            if value < 128.0:
-                self.midi = value
-            else:
-                self.freq = value
-        else:
-            raise TypeError("value must be tuple, string, float or int.")
-
-        # if isinstance(value, int) or isinstance(value, float)
-        midi = 0
 
     # Getter and Setter of midi (same as internal _midi)
     @property
@@ -71,3 +58,27 @@ class Pitch(object):
     @note.deleter
     def note(self) -> None:
         del self.midi
+    
+    def __init__(self, value: Any = None) -> None:
+        pass
+        if isinstance(value, tuple) or isinstance(value, str):
+            self.note = value
+        elif isinstance(value, float) or isinstance(value, int):
+            if value < 128.0:
+                self.midi = value
+            else:
+                self.freq = value
+        else:
+            raise TypeError("value must be tuple, string, float or int.")
+
+        # if isinstance(value, int) or isinstance(value, float)
+        midi = 0
+
+    def __str__(self) -> str:
+        """Return string of note and bend."""
+        n = self.note
+        return n[0] + "+" + str(n[1])
+
+    def __repl__(self) -> str:
+        """Return represenation of Pitch."""
+        return type(self).__name__ + "(" + self.midi + ")"

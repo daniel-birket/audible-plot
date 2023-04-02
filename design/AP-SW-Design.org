@@ -11,12 +11,23 @@
 This document describes the software design for audible-plot.
 #+end_abstract
 
-* Classes
-
-** Class Pitch
+* Class Pitch
 
 This class represents a pitch or frequency and converts between three
-pitch and frequency formats:
+pitch and frequency formats.
+
+** Instance Variables
+
+Instances of this class have the following variables:
+
+- _midi: The pitch as a float MIDI number, with the int MIDI number
+  expressed as the integer portion and the 'bend' between the notes as
+  the float portion after the decimal point.
+
+There are no instance variables for freq and note. These are derived
+from _midi by the getter functions.
+
+** Properties
 
 - Integer MIDI note number, 0 to 127
 - String note name and octave: "C0" to "C9" including sharps and flats
@@ -164,29 +175,25 @@ number, a float number greater than or equal to 0.0 and less than 1.0.
 
 The dunder init initializer should also accept this tuple.
 
-*** Interface
+** Methods
+
+In addition to property getters and setters, the class has the
+following methods:
+
+- __init__: Initializes a pitch from one of several formats.
+- __str__ : Returns a string of the pitch and bend, if any.
+- __repl__: Returns a representation of the Pitch
+
+** Interface
 
 The class Pitch must have the following interface:
 
 #+begin_src python :tangle pitch-face.py
+"""Temporary module to document the Pitch class"""
 from typing import Any
 
 
 class Pitch(object):
-    def __init__(self, value: Any = None) -> None:
-        pass
-        if isinstance(value, tuple) or isinstance(value, str):
-            self.note = value
-        elif isinstance(value, float) or isinstance(value, int):
-            if value < 128.0:
-                self.midi = value
-            else:
-                self.freq = value
-        else:
-            raise TypeError("value must be tuple, string, float or int.")
-
-        # if isinstance(value, int) or isinstance(value, float)
-        midi = 0
 
     # Getter and Setter of midi (same as internal _midi)
     @property
@@ -242,14 +249,55 @@ class Pitch(object):
     @note.deleter
     def note(self) -> None:
         del self.midi
+    
+    def __init__(self, value: Any = None) -> None:
+        pass
+        if isinstance(value, tuple) or isinstance(value, str):
+            self.note = value
+        elif isinstance(value, float) or isinstance(value, int):
+            if value < 128.0:
+                self.midi = value
+            else:
+                self.freq = value
+        else:
+            raise TypeError("value must be tuple, string, float or int.")
+
+        # if isinstance(value, int) or isinstance(value, float)
+        midi = 0
+
+    def __str__(self) -> str:
+        """Return string of note and bend."""
+        n = self.note
+        return n[0] + "+" + str(n[1])
+
+    def __repl__(self) -> str:
+        """Return represenation of Pitch."""
+        return type(self).__name__ + "(" + self.midi + ")"
 #+end_src
 
-** Class PlotData
+* Class PlotData
 
-This class contains and describes the data to be plotted either
-visually or audibly.
+This class describes the data to be plotted (either visually or
+audibly).
 
-*** Properties
+** Instance Variables
+
+Instances of this class have the following variables:
+
+- _points: a NumPy ndarray of the points, with the x values in the
+  first position.
+- _xrange: The min and max of the x coordinates of the points
+- _yrange: The min and max of the y coordinates of the points
+- _xlabel: The x-axis label
+- _ylabel: The y-axis label
+- _xdescr: A verbose description of the x-data
+- _ydescr: A verbose description of the y-data.
+- _line_labels: A list of strings labeling the lines, one for each line.
+- _line_descrs: A list of strings describing the lines, one for each line.
+- _title: The title of the plot
+- _description: A verbose description of the plot
+
+** Properties
 
 This class has the following properties, with automatic getters and setters.
 
@@ -279,13 +327,20 @@ This class has the following properties, with automatic getters and setters.
 - xlabel, ylabel: a (short) string used to label the x and y axis respectively.
 
 - xdescr, ydescr: a (verbose) string describing the x and y axis
-  respectively.
+  respectively. Defaults to the respective label.
+
+- line_labels: a list of (short) strings labeling the lines. Defaults
+  to "Line 1", "Line 2", etc.
+
+- line_descrs: a list of (verbose) strings describing the lines:
+  Defaults to the respective line_labels.
 
 - title: a (short) string used to title the entire plot.
 
-- description: a (verbose) string describing the entire plot.
+- description: a (verbose) string describing the entire plot. Defaults
+  to the title.
 
-*** Methods
+** Methods
 
 In addition to property getters and setters, the class has the
 following methods:
@@ -293,15 +348,15 @@ following methods:
 - autoxrange(): set xrange based on the points.
 - autoyrange(): set yrange based on the points.
 
-- getxsize(): get the number of points horizontally
-- getysize(): get the number of functions vertically
+- xsize(): get the number of points horizontally
+- ysize(): get the number of functions vertically
 
-*** Interface
+** Interface
 
 The class must have the following interface:
 
 #+begin_src python :tangle plotdata-face.py
-"""Temporary module to test PlotData class"""
+"""Temporary module to document the PlotData class"""
 import numpy as np
 
 
@@ -404,6 +459,32 @@ class PlotData(object):
         self._ydescr = ""
 
     @property
+    def line_labels(self) -> list[str]:
+        """List of labels for lines."""
+        return self._line_labels
+
+    @line_labels.setter
+    def line_labels(self, ll: list[str]) -> None:
+        _line_labels = ll
+
+    @line_labels.deleter
+    def line_labels(self) -> None:
+        _line_labels = ["" for _ in range(self.ysize)]
+
+    @property
+    def line_descrs(self) -> list[str]:
+        """List of labels for lines."""
+        return self._line_descrs
+
+    @line_descrs.setter
+    def line_descrs(self, ld: list[str]) -> None:
+        _line_descrs = ld
+
+    @line_descrs.deleter
+    def line_descrs(self) -> None:
+        _line_descrs = ["" for _ in range(self.ysize)]
+        
+    @property
     def title(self) -> str:
         return self._title
 
@@ -437,11 +518,11 @@ class PlotData(object):
         one tenth of the difference between the simple min and max."""
         self._yrange = (0.0, 1.0)
 
-    def getxsize(self) -> int:
+    def xsize(self) -> int:
         """Get n, the x dimension size of the point array."""
         return 0
 
-    def getysize(self) -> int:
+    def ysize(self) -> int:
         """Get m, the number of y functions in the point array."""
         return 0
 
@@ -455,4 +536,58 @@ class PlotData(object):
         self.ydescr = "y-data"
         self.title = "X-Y Plot"
         self.description = ""
+#+end_src
+
+* Class PlotVisual
+
+This class describes and creates the desired visual plot of the data
+described by the PlotData class.
+
+
+** Instance Variables
+
+Instances of this class have the following variables:
+
+- _format: one of "png", "gif", or "jpeg"
+- _output: name of the gpl and output file, less the file extension
+- _size: tuple of (xpixels, ypixels)
+
+** Properties
+
+This class has the following properties, with automatic getters and
+setters.
+
+- format: format of the graphics file. One of "png", "jpeg", "gif"
+  or "svg". The default is "png". If set to another string, the
+  default will be used. The format is used to set the format of the
+  output of gnuplot and to set the output filename extension.
+- output: name of the graphics file and the gpl file. If nothing is specified, the
+  title of the plotdata will be used. The filetype will be appended to
+  this string to set the output filename. `.gpl` is appended to create
+  the gpl filename. May not contain "gpl" or one of the format strings.
+- size: the x and y size of the graphic in pixels. A tuple (xpixels,
+  ypixels). The default is (640, 480)
+
+** Methods
+
+In addition to property getters and setters, the class has the
+following methods:
+
+- __init__(plotdata: PlotData)
+- out_filename(): Complete output filename assembled from `output` and `format`.
+- gpl_filename(): Complete gnuplot filename assembled from `output` and
+  ".gpl"
+- write_gpl(): Write the `gnuplot` command gpl file (with embedded data block)
+- plot_gpl(): Plot the gpl command file with `gnuplot`.
+
+** Interface
+
+The class must have the following interface:
+
+#+begin_src python :tangle plotvisual-face.py
+"""Temporary Module to document the PlotVisual class."""
+
+class PlotVisual(object):
+    pass
+
 #+end_src

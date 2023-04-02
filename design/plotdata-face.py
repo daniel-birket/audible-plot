@@ -1,4 +1,4 @@
-"""Temporary module to test PlotData class"""
+"""Temporary module to document the PlotData class"""
 import numpy as np
 
 
@@ -101,6 +101,32 @@ class PlotData(object):
         self._ydescr = ""
 
     @property
+    def line_labels(self) -> list[str]:
+        """List of labels for lines."""
+        return self._line_labels
+
+    @line_labels.setter
+    def line_labels(self, ll: list[str]) -> None:
+        _line_labels = ll
+
+    @line_labels.deleter
+    def line_labels(self) -> None:
+        _line_labels = ["" for _ in range(self.ysize)]
+
+    @property
+    def line_descrs(self) -> list[str]:
+        """List of labels for lines."""
+        return self._line_descrs
+
+    @line_descrs.setter
+    def line_descrs(self, ld: list[str]) -> None:
+        _line_descrs = ld
+
+    @line_descrs.deleter
+    def line_descrs(self) -> None:
+        _line_descrs = ["" for _ in range(self.ysize)]
+        
+    @property
     def title(self) -> str:
         return self._title
 
@@ -134,11 +160,11 @@ class PlotData(object):
         one tenth of the difference between the simple min and max."""
         self._yrange = (0.0, 1.0)
 
-    def getxsize(self) -> int:
+    def xsize(self) -> int:
         """Get n, the x dimension size of the point array."""
         return 0
 
-    def getysize(self) -> int:
+    def ysize(self) -> int:
         """Get m, the number of y functions in the point array."""
         return 0
 
