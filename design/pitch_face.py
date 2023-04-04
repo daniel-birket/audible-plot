@@ -15,10 +15,12 @@ class Pitch(object):
         assert isinstance(m, int) or isinstance(m, float)
         # assert valid 12 to 127 midi number here
         self._midi = float(m)
+        pass
 
     @midi.deleter
     def midi(self) -> None:
         self._midi = 69.0  # "A4", 440 Hz 'A'
+        pass
 
     # Getter and Setter of frequency
     @property
@@ -31,10 +33,12 @@ class Pitch(object):
         assert isinstance(f, int) or isinstance(f, float)
         # assert audible frequency range here
         self._midi = 0.0
+        pass
 
     @freq.deleter
     def freq(self) -> None:
         del self.midi
+        pass
 
     # Getter and Setter of note string
     @property
@@ -54,10 +58,12 @@ class Pitch(object):
         assert 0.0 <= note_bend < 1.0, "Note bend must 0.0 or between 0.0 and 1.0."
 
         self._midi = 0.0
+        pass
 
     @note.deleter
     def note(self) -> None:
         del self.midi
+        pass
     
     def __init__(self, value: Any = None) -> None:
         pass
@@ -73,6 +79,7 @@ class Pitch(object):
 
         # if isinstance(value, int) or isinstance(value, float)
         midi = 0
+        pass
 
     def __str__(self) -> str:
         """Return string of note and bend."""
