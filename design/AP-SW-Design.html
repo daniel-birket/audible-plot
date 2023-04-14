@@ -1,0 +1,1301 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2023-04-03 Mon 20:21 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Software Design</title>
+<meta name="author" content="Daniel Birket &amp; Lawrence Perez" />
+<meta name="generator" content="Org Mode" />
+<style>
+  #content { max-width: 60em; margin: auto; }
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #e6e6e6;
+    border-radius: 3px;
+    background-color: #f2f2f2;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: auto;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    top: -8px;
+    right: 12px;
+    padding: 3px;
+    color: #555;
+    background-color: #f2f2f299;
+  }
+  pre.src:hover:before { display: inline; margin-top: 14px;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-authinfo::before { content: 'Authinfo'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { }
+</style>
+</head>
+<body>
+<div id="content" class="content">
+<h1 class="title">Software Design
+<br />
+<span class="subtitle">Audible-Plot</span>
+</h1>
+<div class="abstract" id="org40929c8">
+<p>
+This document describes the software design for audible-plot.
+</p>
+
+</div>
+
+<div id="outline-container-orgf99053d" class="outline-2">
+<h2 id="orgf99053d"><span class="section-number-2">1.</span> Class Pitch</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+This class represents a pitch or frequency and converts between three
+pitch and frequency formats.
+</p>
+</div>
+
+<div id="outline-container-org0727b86" class="outline-3">
+<h3 id="org0727b86"><span class="section-number-3">1.1.</span> Instance Variables</h3>
+<div class="outline-text-3" id="text-1-1">
+<p>
+Instances of this class have the following variables:
+</p>
+
+<ul class="org-ul">
+<li>_midi: The pitch as a float MIDI number, with the int MIDI number
+expressed as the integer portion and the 'bend' between the notes as
+the float portion after the decimal point.</li>
+</ul>
+
+<p>
+There are no instance variables for freq and note. These are derived
+from _midi by the getter functions.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org7bfa08c" class="outline-3">
+<h3 id="org7bfa08c"><span class="section-number-3">1.2.</span> Properties</h3>
+<div class="outline-text-3" id="text-1-2">
+<ul class="org-ul">
+<li>Integer MIDI note number, 0 to 127</li>
+<li>String note name and octave: "C0" to "C9" including sharps and flats
+like "F#4" and "Eb3"</li>
+<li>Frequency, in Hertz</li>
+</ul>
+
+<p>
+The internal representation of the pitch will be a MIDI number between
+12 and 127, stored as a `float` instead of `integer`. The class must
+extend the class "object", not "float".
+</p>
+
+<p>
+The frequency corresponding to any pitch can be computed with the formula:
+</p>
+
+<div class="math" id="org2111669">
+<p>
+f = 440 * 2<sup>(m-69)/12</sup>
+</p>
+
+</div>
+
+<p>
+Where:
+</p>
+<ul class="org-ul">
+<li>f: frequency in hertz</li>
+<li>m: MIDI note number, as a float</li>
+</ul>
+
+<p>
+or in python:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python">freq = 440.0 * 2.0^((midi - 69.0)/12)
+</pre>
+</div>
+
+<p>
+In the other direction, the float midi note may be calculated by
+inverting the same equation:
+</p>
+
+<div class="math" id="org2e91dbf">
+<p>
+m = 12 * log<sub>2</sub>(f / 440) + 69
+</p>
+
+</div>
+
+<p>
+or in python:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python">midi = 12.0 * math.log2(freq / 440.0) + 69.0
+</pre>
+</div>
+
+<p>
+When converting from a string to a MIDI note, the string should be of
+the format "C0" or "C#0", with the capital note letter name as the
+first character, the digit of the octave as the last digit and an
+optional "#", "♯" (Unicode "MUSIC SHARP SIGN"), or "+" (PLUS), or a "b", "♭"
+(Unicode "MUSIC FLAT SIGN"), or "-" (HYPHEN) character between them.
+</p>
+
+<p>
+The octave digit must be 0 to 9. Note that some of octave 0 is below
+the range of human hearing. The base MIDI number of each octave is:
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-right" />
+
+<col  class="org-right" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-right">Octave</th>
+<th scope="col" class="org-right">MIDI</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-right">0</td>
+<td class="org-right">12</td>
+</tr>
+
+<tr>
+<td class="org-right">1</td>
+<td class="org-right">24</td>
+</tr>
+
+<tr>
+<td class="org-right">2</td>
+<td class="org-right">36</td>
+</tr>
+
+<tr>
+<td class="org-right">3</td>
+<td class="org-right">48</td>
+</tr>
+
+<tr>
+<td class="org-right">4</td>
+<td class="org-right">60</td>
+</tr>
+
+<tr>
+<td class="org-right">5</td>
+<td class="org-right">72</td>
+</tr>
+
+<tr>
+<td class="org-right">6</td>
+<td class="org-right">84</td>
+</tr>
+
+<tr>
+<td class="org-right">7</td>
+<td class="org-right">96</td>
+</tr>
+
+<tr>
+<td class="org-right">8</td>
+<td class="org-right">108</td>
+</tr>
+
+<tr>
+<td class="org-right">9</td>
+<td class="org-right">120</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+The base MIDI note of each octave may be computed as:
+</p>
+
+<div class="math" id="org0149f98">
+<p>
+base = 12 * (octave + 1)
+</p>
+
+</div>
+
+<p>
+The octave of a MIDI note may be computed as:
+</p>
+
+<div class="math" id="org3d76e7d">
+<p>
+octave = int((midi - 12) / 12)
+</p>
+
+</div>
+
+<p>
+This formula produces:
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-right" />
+
+<col  class="org-right" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-right">MIDI</th>
+<th scope="col" class="org-right">Octave</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-right">12</td>
+<td class="org-right">0</td>
+</tr>
+
+<tr>
+<td class="org-right">23</td>
+<td class="org-right">0</td>
+</tr>
+
+<tr>
+<td class="org-right">24</td>
+<td class="org-right">1</td>
+</tr>
+
+<tr>
+<td class="org-right">35</td>
+<td class="org-right">1</td>
+</tr>
+
+<tr>
+<td class="org-right">36</td>
+<td class="org-right">2</td>
+</tr>
+
+<tr>
+<td class="org-right">119</td>
+<td class="org-right">8</td>
+</tr>
+
+<tr>
+<td class="org-right">120</td>
+<td class="org-right">9</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+The note letter must be capital A to G. These notes map to an MIDI
+note offset from the base of the octave as follows:
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-right" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">Note</th>
+<th scope="col" class="org-right">Offset</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">C</td>
+<td class="org-right">0</td>
+</tr>
+
+<tr>
+<td class="org-left">D</td>
+<td class="org-right">2</td>
+</tr>
+
+<tr>
+<td class="org-left">E</td>
+<td class="org-right">4</td>
+</tr>
+
+<tr>
+<td class="org-left">F</td>
+<td class="org-right">5</td>
+</tr>
+
+<tr>
+<td class="org-left">G</td>
+<td class="org-right">7</td>
+</tr>
+
+<tr>
+<td class="org-left">A</td>
+<td class="org-right">9</td>
+</tr>
+
+<tr>
+<td class="org-left">B</td>
+<td class="org-right">11</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+The accidental (sharp or flat) must be one of #, ♯, or + for sharp or
+b, ♭, or - for flat. These characters add or subtract one from the
+MIDI note number. Double sharps and double flats, if implemented, add
+or subtract 2 midi notes. Unusual musical combinations, like "E#4" or "Cb4",
+which are the same as "F4" and "B3", respectively, are permitted.
+</p>
+
+<p>
+The MIDI number is the sum of the octave base, the note offset and the
++1 or -1 for a sharp or flat, if any
+</p>
+
+<p>
+If the string is not of this format, then the conversion should check
+if the string is a valid integer or float number in the range greater
+than or equal to 12 and less than 128 and interpret a number in that
+range as a float MIDI number.
+</p>
+
+<p>
+If the string is empty, or the integer is 0, or the float is 0.0, the
+pitch should initialize to "A4", a 440 Hz 'A' note.
+</p>
+
+<p>
+If the string or integer or float is negative, it should raise a ValueError.
+</p>
+
+<p>
+Finally, if the string is a valid integer or float greater than or
+equal to 128 and less than or equal to 22000, it should interpret the
+value as a frequency.
+</p>
+
+<p>
+If the initializer is already an integer or float, it should perform
+the same range checks.
+</p>
+
+<p>
+If the string is neither a valid note name or a number in one of the
+valid ranges for a MIDI note or an audible frequency, it should raise
+a ValueError.
+</p>
+
+<p>
+If the initializer is not a string, integer or float, note tuple, or another
+Pitch, it should raise a TypeError.
+</p>
+
+<p>
+Except for the dunder init initializer, which detects the format of the
+pitch, Pitch should provide a property() interface to note, midi and
+freq fields, with getter and setter methods and doc strings.
+</p>
+
+<p>
+When converting from a float MIDI number to a note string, the program
+will return a 2-item tuple. The first item of the tuple must be a note
+string with note letter, optional sharp sign (using the shift-3 sharp
+not the unicode "MUSIC SHARP SIGN", and the octave digit. The note
+string represents the integer part of the float MIDI number. The
+second item of the tuple must be the fractional part of the MIDI
+number, a float number greater than or equal to 0.0 and less than 1.0.
+</p>
+
+<p>
+The dunder init initializer should also accept this tuple.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org130751d" class="outline-3">
+<h3 id="org130751d"><span class="section-number-3">1.3.</span> Methods</h3>
+<div class="outline-text-3" id="text-1-3">
+<p>
+In addition to property getters and setters, the class has the
+following methods:
+</p>
+
+<ul class="org-ul">
+<li>__init__: Initializes a pitch from one of several formats.</li>
+<li>__str__ : Returns a string of the pitch and bend, if any.</li>
+<li>__repl__: Returns a representation of the Pitch</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org6bfb099" class="outline-3">
+<h3 id="org6bfb099"><span class="section-number-3">1.4.</span> Interface</h3>
+<div class="outline-text-3" id="text-1-4">
+<p>
+The class Pitch must have the following interface:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python">"""Temporary module to document the Pitch class"""
+from typing import Any
+
+
+class Pitch(object):
+
+    # Getter and Setter of midi (same as internal _midi)
+    @property
+    def midi(self) -&gt; float:
+        "float MIDI number of pitch."
+        return self._midi
+
+    @midi.setter
+    def midi(self, m: float) -&gt; None:
+        assert isinstance(m, int) or isinstance(m, float)
+        # assert valid 12 to 127 midi number here
+        self._midi = float(m)
+        pass
+
+    @midi.deleter
+    def midi(self) -&gt; None:
+        self._midi = 69.0  # "A4", 440 Hz 'A'
+        pass
+
+    # Getter and Setter of frequency
+    @property
+    def freq(self) -&gt; float:
+        "float frequence of pitch in hertz."
+        return 0.0
+
+    @freq.setter
+    def freq(self, f: float) -&gt; None:
+        assert isinstance(f, int) or isinstance(f, float)
+        # assert audible frequency range here
+        self._midi = 0.0
+        pass
+
+    @freq.deleter
+    def freq(self) -&gt; None:
+        del self.midi
+        pass
+
+    # Getter and Setter of note string
+    @property
+    def note(self) -&gt; tuple:
+        "pitch as tuple of note string and fractional note."
+        return ("A4", 0.0)
+
+    @note.setter
+    def note(self, n) -&gt; None:
+        if isinstance(n, tuple):
+            note_str, note_bend = n  # unpack tuple
+        elif isinstance(n, str):
+            note_str = n
+            note_bend = 0.0
+        assert isinstance(note_str, str), "Note string must be a string like 'A4'."
+        assert isinstance(note_bend, float), "Note bend must be a float like 0.0."
+        assert 0.0 &lt;= note_bend &lt; 1.0, "Note bend must 0.0 or between 0.0 and 1.0."
+
+        self._midi = 0.0
+        pass
+
+    @note.deleter
+    def note(self) -&gt; None:
+        del self.midi
+        pass
+    
+    def __init__(self, value: Any = None) -&gt; None:
+        pass
+        if isinstance(value, tuple) or isinstance(value, str):
+            self.note = value
+        elif isinstance(value, float) or isinstance(value, int):
+            if value &lt; 128.0:
+                self.midi = value
+            else:
+                self.freq = value
+        else:
+            raise TypeError("value must be tuple, string, float or int.")
+
+        # if isinstance(value, int) or isinstance(value, float)
+        midi = 0
+        pass
+
+    def __str__(self) -&gt; str:
+        """Return string of note and bend."""
+        n = self.note
+        return n[0] + "+" + str(n[1])
+
+    def __repl__(self) -&gt; str:
+        """Return represenation of Pitch."""
+        return type(self).__name__ + "(" + self.midi + ")"
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgcb3ad9e" class="outline-2">
+<h2 id="orgcb3ad9e"><span class="section-number-2">2.</span> Class PlotData</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+This class describes the data to be plotted (either visually or
+audibly).
+</p>
+</div>
+
+<div id="outline-container-orge10992f" class="outline-3">
+<h3 id="orge10992f"><span class="section-number-3">2.1.</span> Instance Variables</h3>
+<div class="outline-text-3" id="text-2-1">
+<p>
+Instances of this class have the following variables:
+</p>
+
+<ul class="org-ul">
+<li>_points: a NumPy ndarray of the points, with the x values in the
+first position.</li>
+<li>_xrange: The min and max of the x coordinates of the points</li>
+<li>_yrange: The min and max of the y coordinates of the points</li>
+<li>_xlabel: The x-axis label</li>
+<li>_ylabel: The y-axis label</li>
+<li>_xdescr: A verbose description of the x-data</li>
+<li>_ydescr: A verbose description of the y-data.</li>
+<li>_line_labels: A list of strings labeling the lines, one for each line.</li>
+<li>_line_descrs: A list of strings describing the lines, one for each line.</li>
+<li>_title: The title of the plot</li>
+<li>_description: A verbose description of the plot</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgea5cc5e" class="outline-3">
+<h3 id="orgea5cc5e"><span class="section-number-3">2.2.</span> Properties</h3>
+<div class="outline-text-3" id="text-2-2">
+<p>
+This class has the following properties, with automatic getters and setters.
+</p>
+
+<ul class="org-ul">
+<li>points: an m by n matrix (numpy ndarray) of floats giving the horizontal x-axis
+coordinates in the m = 0 column and the vertical y-axis coordinates
+of the points to plot for m-1 lines in the remaining columns.
+
+<ul class="org-ul">
+<li>the number of horizontal x coordinates, n, is expected to be
+between 2 and 100</li>
+
+<li>the number of sets of vertical y coordinates (ie. functions) is
+expected to be between 1 and 9, so `m`, which includes the x
+coordinates, will be between 2 and 10.</li>
+
+<li>the array is stored as a vector (list) of points, where each point
+is a vector of at least two floats: (x, y1). `points[0]`
+is the first set of points at the x-position points[0,0].</li>
+</ul></li>
+
+<li>xrange: a tuple of two floats (min, max). The horizontal range to
+plot. If set to (0,0) or min = max, the range will be calculated
+from the points array. If (min &gt; max), they will be swapped.</li>
+
+<li>yrange: a type of two floats (min, max). The vertical range to
+plot. If set to (0,0) or min = max, the range will be calculated
+from the points array. If (min &gt; max), they will be swapped.</li>
+
+<li>xlabel, ylabel: a (short) string used to label the x and y axis
+respectively. Defaults to "x" and "y".</li>
+
+<li>xdescr, ydescr: a (verbose) string describing the x and y axis
+respectively. Defaults to empty.</li>
+
+<li>line_labels: a list of (short) strings labeling the lines. Defaults
+to "Line 1", "Line 2", etc. if there are two or more lines. Defaults
+to ylabel if there is only one line.</li>
+
+<li>line_descrs: a list of (verbose) strings describing the lines:
+Defaults to the respective line_labels.</li>
+
+<li>title: a (short) string used to title the entire plot. Defaults to
+"&lt;xlabel&gt; versus &lt;ylabel&gt;"</li>
+
+<li>description: a (verbose) string describing the entire plot. Defaults
+to empty.</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org63c223f" class="outline-3">
+<h3 id="org63c223f"><span class="section-number-3">2.3.</span> Methods</h3>
+<div class="outline-text-3" id="text-2-3">
+<p>
+In addition to property getters and setters, the class has the
+following methods:
+</p>
+
+<ul class="org-ul">
+<li>autoxrange(): set xrange based on the points.</li>
+<li>autoyrange(): set yrange based on the points.</li>
+
+<li>xsize(): get the number of points horizontally. Sames as n of points[m,n]</li>
+<li>ysize(): get the number of functions vertically. Same as m-1 of
+points [m,n]</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgdec9a7d" class="outline-3">
+<h3 id="orgdec9a7d"><span class="section-number-3">2.4.</span> Interface</h3>
+<div class="outline-text-3" id="text-2-4">
+<p>
+The class must have the following interface:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python">"""Temporary module to document the PlotData class"""
+import numpy as np
+import math
+
+class PlotData(object):
+    """Class to hold data to be plotted and associated descriptors."""
+
+    def __init__(self, p: np.ndarray) -&gt; None:
+        """Initialize the plot data from the array. Default the rest."""
+        self._points: np.ndarray = p
+        self.autoxrange()
+        self.autoyrange()
+        self._xlabel: str = "x"
+        self._ylabel: str = "y"
+        self._xdescr: str  = ""
+        self._ydescr: str  = ""
+        self._title: str = ""
+        self._description: str = ""
+        self._line_labels: list[str] = []
+        self._line_descrs: list[str] = []
+        pass
+
+    @property
+    def points(self) -&gt; np.ndarray:
+        """Numpy n-dimension array of points. X-values first."""
+        return self._points
+
+    @points.setter
+    def points(self, p: np.ndarray) -&gt; None:
+        self._points = p
+        pass
+
+    @points.deleter
+    def points(self) -&gt; None:
+        self._points = np.ndarray([[0, 0], [1, 1]])
+        pass
+
+
+    @property
+    def xrange(self) -&gt; tuple[float, float]:
+        """Min and Max of the x-values."""
+        return self._xrange
+
+    @xrange.setter
+    def xrange(self, xr: tuple[float, float]) -&gt; None:
+        """Set the min and max of the x-values. If min = max, then
+        perform autoxrange. If min &gt; max, then swap them."""
+        self._xrange = xr
+        pass
+
+    @xrange.deleter
+    def xrange(self) -&gt; None:
+        self.xrange = (0, 0)
+        pass
+
+
+    @property
+    def yrange(self) -&gt; tuple[float, float]:
+        """Min and Max of the y-values, for all functions."""
+        return self._yrange
+
+    @yrange.setter
+    def yrange(self, yr: tuple[float, float]) -&gt; None:
+        """Set the min and max of the y-values. If min = max, then
+        perform autoyrange. If min &gt; max, then swap them."""
+        self._yrange = yr
+        pass
+
+    @yrange.deleter
+    def yrange(self) -&gt; None:
+        self.yrange = (0, 0)
+        pass
+
+
+    @property
+    def xlabel(self) -&gt; str:
+        """Short label of x-axis"""
+        return self._xlabel
+
+    @xlabel.setter
+    def xlabel(self, xl: str):
+        self._xlabel = xl
+        pass
+
+    @xlabel.deleter
+    def xlabel(self) -&gt; None:
+        self._xlabel = ""
+        pass
+
+
+    @property
+    def ylabel(self) -&gt; str:
+        """Short label of y-axis"""
+        return self._ylabel
+
+    @ylabel.setter
+    def ylabel(self, yl: str):
+        self._ylabel = yl
+        pass
+
+    @ylabel.deleter
+    def ylabel(self) -&gt; None:
+        self._ylabel = ""
+        pass
+
+
+    @property
+    def xdescr(self) -&gt; str:
+        """Verbose description of x-data."""
+        return self._xdescr
+
+    @xdescr.setter
+    def xdescr(self, xd: str):
+        self._xdescr = xd
+        pass
+
+    @xdescr.deleter
+    def xdescr(self) -&gt; None:
+        self._xdescr = ""
+        pass
+
+
+    @property
+    def ydescr(self) -&gt; str:
+        """Verbose description of y-data."""
+        return self._ydescr
+
+    @ydescr.setter
+    def ydescr(self, yd: str):
+        self._ydescr = yd
+        pass
+
+    @ydescr.deleter
+    def ydescr(self) -&gt; None:
+        self._ydescr = ""
+        pass
+
+
+    @property
+    def line_labels(self) -&gt; list[str]:
+        """List of labels for lines."""
+        return self._line_labels
+
+    @line_labels.setter
+    def line_labels(self, ll: list[str]) -&gt; None:
+        self._line_labels = ll
+        pass
+
+    @line_labels.deleter
+    def line_labels(self) -&gt; None:
+        self._line_labels = ["" for _ in range(self.ysize)]
+        pass
+
+
+    @property
+    def line_descrs(self) -&gt; list[str]:
+        """List of labels for lines."""
+        return self._line_descrs
+
+    @line_descrs.setter
+    def line_descrs(self, ld: list[str]) -&gt; None:
+        self._line_descrs = ld
+        pass
+
+    @line_descrs.deleter
+    def line_descrs(self) -&gt; None:
+        self._line_descrs = ["" for _ in range(self.ysize)]
+        pass
+
+
+    @property
+    def title(self) -&gt; str:
+        """Title of plot."""
+        if self._title:
+            return self._title
+        else:
+            return self.ylabel + " versus " + self.xlabel
+
+    @title.setter
+    def title(self, t: str) -&gt; None:
+        self._title = t
+        pass
+
+    @title.deleter
+    def title(self) -&gt; None:
+        self._title = ""
+        pass
+
+
+    @property
+    def description(self) -&gt; str:
+        """Verbose description of plot."""
+        return self._description
+
+    @description.setter
+    def description(self, d: str) -&gt; None:
+        self._description = d
+        pass
+
+    @description.deleter
+    def description(self) -&gt; None:
+        self._description = ""
+        pass
+
+
+    @property
+    def line_labels(self) -&gt; list[str]:
+        """List of strings of line labels for legend."""
+        if _line_labels:
+            return _line_labels
+        else:
+            ys = self.ysize()
+            if ys &gt; 1:
+                _line_labels = ["Line "+str(i) for i in range(1, ys+1)]
+            else:
+                _line_labels = self.ylabel
+
+    @line_labels.setter
+    def line_labels(self, ll: list[str]) -&gt; None:
+        self._line_labels = ll
+        pass
+
+    @line_labels.deleter
+    def line_labels(self) -&gt; None:
+        _line_labels = []
+        pass
+
+    @property
+    def line_descrs(self) -&gt; list[str]:
+        """List of strings of line descriptions."""
+        return _line_descrs
+
+    @line_descrs.setter
+    def line_descrs(self, ld: list[str]) -&gt; None:
+        self._line_descrs = ld
+        pass
+
+    @line_descrs.deleter
+    def line_descrs(self) -&gt; None:
+        _line_descrs = []
+        pass
+
+
+    @staticmethod
+    def round_range(r: tuple[float, float]) -&gt; float:
+        """Round the min and max down and up to the next round interval"""
+        ad = abs(r[1] - r[0])   # absolute distance from min to max
+        dp = int(math.log10(ad))     # position of decimal point
+        fac = 10^dp                  # factor of decimal point
+        lo = math.floor(r[0] / fac) * fac
+        hi = math.ceil(r[1] / fac) * fac
+        return (lo, hi)        
+                
+    def autoxrange(self) -&gt; None:
+        """Set the min and max of the x values, rounded down and up
+        the order (log10) of the difference between the data min and max."""
+        self._xrange = (0.0, 1.0)
+        pass
+
+    def autoyrange(self) -&gt; None:
+        """Set the min and max of the y values, rounded down and up
+        the order (log10) of the difference between the data min and max."""
+        self._yrange = (0.0, 1.0)
+        pass
+
+    def xsize(self) -&gt; int:
+        """Get n, the x dimension size of the point array."""
+        return 0
+
+    def ysize(self) -&gt; int:
+        """Get m, the number of y functions in the point array."""
+        return 0
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgf9145d0" class="outline-2">
+<h2 id="orgf9145d0"><span class="section-number-2">3.</span> Class PlotVisual</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+This class describes and creates the desired visual plot of the data
+described by the PlotData class.
+</p>
+</div>
+
+
+<div id="outline-container-org6e78cf3" class="outline-3">
+<h3 id="org6e78cf3"><span class="section-number-3">3.1.</span> Instance Variables</h3>
+<div class="outline-text-3" id="text-3-1">
+<p>
+Instances of this class have the following variables:
+</p>
+
+<ul class="org-ul">
+<li>_filetype: one of "png", "gif", or "jpeg"</li>
+<li>_output: name of the gp and output file, less the file extension</li>
+<li>_size: tuple of (xpixels, ypixels)</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgbbac8f9" class="outline-3">
+<h3 id="orgbbac8f9"><span class="section-number-3">3.2.</span> Class Constants</h3>
+<div class="outline-text-3" id="text-3-2">
+<p>
+The class defines the following constants:
+</p>
+
+<ul class="org-ul">
+<li><p>
+filetypes: list[str]. ["png", "gif", "jpeg", "svg"]
+</p>
+
+<p>
+Considering using class enum.StrEnum from enum.py instead of string.
+</p></li>
+</ul>
+<div class="org-src-container">
+<pre class="src src-python">import enum
+
+class FileType(enum.StrEnum):
+    PNG = enum.auto()
+    GIF = enum.auto()
+    JPEG = enum.auto()
+    SVG = enum.auto()
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgef08e29" class="outline-3">
+<h3 id="orgef08e29"><span class="section-number-3">3.3.</span> Properties</h3>
+<div class="outline-text-3" id="text-3-3">
+<p>
+This class has the following properties, with automatic getters and
+setters.
+</p>
+
+<ul class="org-ul">
+<li>filetype: Type (and extension) of the graphics file. One of "svg", "png", "jpeg", or
+"gif". The default is "png". If set to another string, the default
+will be used. The filetype is used to set the filetype of the output of
+gnuplot and to set the output filename extension.</li>
+
+<li>output: name of the graphics file and the gp file. If nothing is specified, the
+title of the plotdata will be used. The filetype will be appended to
+this string to set the output filename. `.gp` is appended to create
+the gp filename. May not contain "gp" or one of the filetype strings.</li>
+<li>size: the x and y size of the graphic in pixels. A tuple (xpixels,
+ypixels). The default is (640, 480).</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org82258ee" class="outline-3">
+<h3 id="org82258ee"><span class="section-number-3">3.4.</span> Methods</h3>
+<div class="outline-text-3" id="text-3-4">
+<p>
+In addition to property getters and setters, the class has the
+following methods:
+</p>
+
+<ul class="org-ul">
+<li>__init__(plotdata: PlotData) -&gt; None: Initialize the PlotVisual object.</li>
+<li>out_filename() -&gt; str: Get complete output filename assembled from `output`
+and the selected `filetype`.</li>
+<li>tsv_filename() -&gt; str: Get the complete tab-separated-values filename
+assembled from 'output' and '.tsv'</li>
+<li>gp_filename() -&gt; str: Get complete gnuplot filename assembled from `output` and
+`.gp`</li>
+<li>write_tsv() -&gt; None: Write the `.tsv` data points file (with header line).</li>
+<li>write_gp() -&gt; None: Write the `gp` command file (referencing tsv file).</li>
+<li>plot_gp() -&gt; None: Plot the `.gp` command file with `gnuplot`.</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org39a3560" class="outline-3">
+<h3 id="org39a3560"><span class="section-number-3">3.5.</span> Interface</h3>
+<div class="outline-text-3" id="text-3-5">
+<p>
+The class must have the following interface:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python">"""Temporary Module to document the PlotVisual class."""
+
+import enum
+import math
+import plotdata_face
+
+
+class FileType(enum.StrEnum):
+    """Enumeration of plot graphic file types."""
+
+    PNG = enum.auto()
+    GIF = enum.auto()
+    JPEG = enum.auto()
+    SVG = enum.auto()
+
+
+class PlotVisual(object):
+    """Class to define and visually plot a PlotData object."""
+
+    def __init__(self, pd: PlotData) -&gt; None:
+        """Initialize a visual plot with PlotData."""
+        self._filetype = FileType.PNG
+        self._output = "plot"
+        self._size = (640, 480)
+        pass
+
+    @property
+    def filetype(self) -&gt; FileType:
+        "Type of output file. `png`, `gif`, `jpeg`, or `svg`."
+        return self._filetype
+
+    @filetype.setter
+    def filetype(self, ft: FileType) -&gt; None:
+        self._filetype = ft
+        pass
+
+    @property
+    def output(self) -&gt; str:
+        """Name of output graphic, tsv and gp files."""
+        return self._output
+
+    @output.setter
+    def output(self, out: str) -&gt; None:
+        self._output = out
+        pass
+
+    @property
+    def size(self) -&gt; tuple[int, int]:
+        return self._size
+
+    @size.setter
+    def size(self, s: tuple[int, int]):
+        self._size = s
+        pass
+
+    def out_filename(self) -&gt; str:
+        """Get the output graphic filename from `output` and `filetype`."""
+        return ""
+
+    def tsv_filename(self) -&gt; str:
+        """Get the tab-seperated-values data filename from `output` and `.tsv`."""
+        return ""
+
+    def gp_filename(self) -&gt; str:
+        """Get the gnuplot commands filename from `output` and `.gp`."""
+        return ""
+
+    def write_tsv(self) -&gt; None:
+        """Write the `.tsv` data file with headers and data."""
+        pass
+
+    def write_gp(self) -&gt; None:
+        """Write the `.gp` commands file."""
+        pass
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: Daniel Birket &amp; Lawrence Perez</p>
+<p class="date">Created: 2023-04-03 Mon 20:21</p>
+<p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>

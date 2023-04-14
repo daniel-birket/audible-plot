@@ -1,3 +1,4 @@
+# -*- mode: org; org-src-preserve-indentation: t -*-
 #+TITLE: Software Design
 #+SUBTITLE: Audible-Plot
 #+AUTHOR: Daniel Birket &
@@ -10,15 +11,26 @@
 This document describes the software design for audible-plot.
 #+end_abstract
 
-* Classes
-
-** Class Pitch
+* Class Pitch
 
 This class represents a pitch or frequency and converts between three
-pitch and frequency formats:
+pitch and frequency formats.
+
+** Instance Variables
+
+Instances of this class have the following variables:
+
+- _midi: The pitch as a float MIDI number, with the int MIDI number
+  expressed as the integer portion and the 'bend' between the notes as
+  the float portion after the decimal point.
+
+There are no instance variables for freq and note. These are derived
+from _midi by the getter functions.
+
+** Properties
 
 - Integer MIDI note number, 0 to 127
-- String note name and octave: "C1" to "C9" including sharps and flats
+- String note name and octave: "C0" to "C9" including sharps and flats
   like "F#4" and "Eb3"
 - Frequency, in Hertz
 
@@ -39,7 +51,7 @@ Where:
 or in python:
 
 #+begin_src python
-  freq = 440.0 * 2.0^((midi - 69.0)/12)
+freq = 440.0 * 2.0^((midi - 69.0)/12)
 #+end_src
 
 In the other direction, the float midi note may be calculated by
@@ -52,7 +64,7 @@ m = 12 * log_{2}(f / 440) + 69
 or in python:
 
 #+begin_src python
-  midi = 12.0 * math.log2(freq / 440.0) + 69.0
+midi = 12.0 * math.log2(freq / 440.0) + 69.0
 #+end_src
 
 When converting from a string to a MIDI note, the string should be of
@@ -163,88 +175,613 @@ number, a float number greater than or equal to 0.0 and less than 1.0.
 
 The dunder init initializer should also accept this tuple.
 
+** Methods
+
+In addition to property getters and setters, the class has the
+following methods:
+
+- __init__: Initializes a pitch from one of several formats.
+- __str__ : Returns a string of the pitch and bend, if any.
+- __repl__: Returns a representation of the Pitch
+
+** Interface
+
 The class Pitch must have the following interface:
 
-#+begin_src python
-  from typing import Any
+#+begin_src python :tangle pitch_face.py
+"""Temporary module to document the Pitch class"""
+from typing import Any
 
 
-  class Pitch(object):
-      def __init__(self, value: Any = None) -> None:
-	  pass
-	  if isinstance(value, tuple) or isinstance(value, str):
-	      self.note = value
-	  elif isinstance(value, float) or isinstance(value, int):
-	      if value < 128.0:
-		  self.midi = value
-	      else:
-		  self.freq = value
-	  else:
-	      raise TypeError("value must be tuple, string, float or int.")
+class Pitch(object):
 
-	  # if isinstance(value, int) or isinstance(value, float)
-	  midi = 0
+    # Getter and Setter of midi (same as internal _midi)
+    @property
+    def midi(self) -> float:
+        "float MIDI number of pitch."
+        return self._midi
 
-      # Getter and Setter of midi (same as internal _midi)
-      @property
-      def midi(self) -> float:
-	  "float MIDI number of pitch."
-	  return self._midi
+    @midi.setter
+    def midi(self, m: float) -> None:
+        assert isinstance(m, int) or isinstance(m, float)
+        # assert valid 12 to 127 midi number here
+        self._midi = float(m)
+        pass
 
-      @midi.setter
-      def midi(self, m: float) -> None:
-	  assert isinstance(m, int) or isinstance(m, float)
-	  # assert valid 12 to 127 midi number here
-	  self._midi = float(m)
+    @midi.deleter
+    def midi(self) -> None:
+        self._midi = 69.0  # "A4", 440 Hz 'A'
+        pass
 
-      @midi.deleter
-      def midi(self) -> None:
-	  self._midi = 69.0  # "A4", 440 Hz 'A'
+    # Getter and Setter of frequency
+    @property
+    def freq(self) -> float:
+        "float frequence of pitch in hertz."
+        return 0.0
 
-      # Getter and Setter of frequency
-      @property
-      def freq(self) -> float:
-	  "float frequence of pitch in hertz."
-	  return 0.0
+    @freq.setter
+    def freq(self, f: float) -> None:
+        assert isinstance(f, int) or isinstance(f, float)
+        # assert audible frequency range here
+        self._midi = 0.0
+        pass
 
-      @freq.setter
-      def freq(self, f: float) -> None:
-	  assert isinstance(f, int) or isinstance(f, float)
-	  # assert audible frequency range here
-	  self._midi = 0.0
+    @freq.deleter
+    def freq(self) -> None:
+        del self.midi
+        pass
 
-      @freq.deleter
-      def freq(self) -> None:
-	  del self.midi
+    # Getter and Setter of note string
+    @property
+    def note(self) -> tuple:
+        "pitch as tuple of note string and fractional note."
+        return ("A4", 0.0)
 
-      # Getter and Setter of note string
-      @property
-      def note(self) -> tuple:
-	  "pitch as tuple of note string and fractional note."
-	  return ("A4", 0.0)
+    @note.setter
+    def note(self, n) -> None:
+        if isinstance(n, tuple):
+            note_str, note_bend = n  # unpack tuple
+        elif isinstance(n, str):
+            note_str = n
+            note_bend = 0.0
+        assert isinstance(note_str, str), "Note string must be a string like 'A4'."
+        assert isinstance(note_bend, float), "Note bend must be a float like 0.0."
+        assert 0.0 <= note_bend < 1.0, "Note bend must 0.0 or between 0.0 and 1.0."
 
-      @note.setter
-      def note(self, n) -> None:
-	  if isinstance(n, tuple):
-	      note_str, note_bend = n  # unpack tuple
-	  elif isinstance(n, str):
-	      note_str = n
-	      note_bend = 0.0
-	  assert isinstance(note_str, str), "Note string must be a string like 'A4'."
-	  assert isinstance(note_bend, float), "Note bend must be a float like 0.0."
-	  assert 0.0 <= note_bend < 1.0, "Note bend must 0.0 or between 0.0 and 1.0."
+        self._midi = 0.0
+        pass
 
-	  self._midi = 0.0
+    @note.deleter
+    def note(self) -> None:
+        del self.midi
+        pass
+    
+    def __init__(self, value: Any = None) -> None:
+        pass
+        if isinstance(value, tuple) or isinstance(value, str):
+            self.note = value
+        elif isinstance(value, float) or isinstance(value, int):
+            if value < 128.0:
+                self.midi = value
+            else:
+                self.freq = value
+        else:
+            raise TypeError("value must be tuple, string, float or int.")
 
-      @note.deleter
-      def note(self) -> None:
-	  del self.midi
+        # if isinstance(value, int) or isinstance(value, float)
+        midi = 0
+        pass
+
+    def __str__(self) -> str:
+        """Return string of note and bend."""
+        n = self.note
+        return n[0] + "+" + str(n[1])
+
+    def __repl__(self) -> str:
+        """Return represenation of Pitch."""
+        return type(self).__name__ + "(" + self.midi + ")"
 #+end_src
 
-** Class ScaleToPitch
+* Class PlotData
 
-This class implements scaling between a range of data values and
-a range of pitches (not frequencies). Frequency doubles for each
-octave of increase of pitch, but people perceive pitch (musical notes)
-as a linear increase, not an exponential increase, so it is more
-appropriate to scale data to pitch than to frequency.
+This class describes the data to be plotted (either visually or
+audibly).
+
+** Instance Variables
+
+Instances of this class have the following variables:
+
+- _points: a NumPy ndarray of the points, with the x values in the
+  first position.
+- _xrange: The min and max of the x coordinates of the points
+- _yrange: The min and max of the y coordinates of the points
+- _xlabel: The x-axis label
+- _ylabel: The y-axis label
+- _xdescr: A verbose description of the x-data
+- _ydescr: A verbose description of the y-data.
+- _line_labels: A list of strings labeling the lines, one for each line.
+- _line_descrs: A list of strings describing the lines, one for each line.
+- _title: The title of the plot
+- _description: A verbose description of the plot
+
+** Properties
+
+This class has the following properties, with automatic getters and setters.
+
+- points: an m by n matrix (numpy ndarray) of floats giving the horizontal x-axis
+  coordinates in the m = 0 column and the vertical y-axis coordinates
+  of the points to plot for m-1 lines in the remaining columns.
+
+  - the number of horizontal x coordinates, n, is expected to be
+    between 2 and 100
+
+  - the number of sets of vertical y coordinates (ie. functions) is
+    expected to be between 1 and 9, so `m`, which includes the x
+    coordinates, will be between 2 and 10.
+
+  - the array is stored as a vector (list) of points, where each point
+    is a vector of at least two floats: (x, y1). `points[0]`
+    is the first set of points at the x-position points[0,0].
+
+- xrange: a tuple of two floats (min, max). The horizontal range to
+  plot. If set to (0,0) or min = max, the range will be calculated
+  from the points array. If (min > max), they will be swapped.
+
+- yrange: a type of two floats (min, max). The vertical range to
+  plot. If set to (0,0) or min = max, the range will be calculated
+  from the points array. If (min > max), they will be swapped.
+
+- xlabel, ylabel: a (short) string used to label the x and y axis
+  respectively. Defaults to "x" and "y".
+
+- xdescr, ydescr: a (verbose) string describing the x and y axis
+  respectively. Defaults to empty.
+
+- line_labels: a list of (short) strings labeling the lines. Defaults
+  to "Line 1", "Line 2", etc. if there are two or more lines. Defaults
+  to ylabel if there is only one line.
+
+- line_descrs: a list of (verbose) strings describing the lines:
+  Defaults to the respective line_labels.
+
+- title: a (short) string used to title the entire plot. Defaults to
+  "<xlabel> versus <ylabel>"
+
+- description: a (verbose) string describing the entire plot. Defaults
+  to empty.
+
+** Methods
+
+In addition to property getters and setters, the class has the
+following methods:
+
+- autoxrange(): set xrange based on the points.
+- autoyrange(): set yrange based on the points.
+
+- xsize(): get the number of points horizontally. Sames as n of points[m,n]
+- ysize(): get the number of functions vertically. Same as m-1 of
+  points [m,n]
+
+** Interface
+
+The class must have the following interface:
+
+#+begin_src python :tangle plotdata_face.py
+"""Temporary module to document the PlotData class"""
+import numpy as np
+import math
+
+class PlotData(object):
+    """Class to hold data to be plotted and associated descriptors."""
+
+    def __init__(self, p: np.ndarray) -> None:
+        """Initialize the plot data from the array. Default the rest."""
+        self._points: np.ndarray = p
+        self.autoxrange()
+        self.autoyrange()
+        self._xlabel: str = "x"
+        self._ylabel: str = "y"
+        self._xdescr: str  = ""
+        self._ydescr: str  = ""
+        self._title: str = ""
+        self._description: str = ""
+        self._line_labels: list[str] = []
+        self._line_descrs: list[str] = []
+        pass
+
+    @property
+    def points(self) -> np.ndarray:
+        """Numpy n-dimension array of points. X-values first."""
+        return self._points
+
+    @points.setter
+    def points(self, p: np.ndarray) -> None:
+        self._points = p
+        pass
+
+    @points.deleter
+    def points(self) -> None:
+        self._points = np.ndarray([[0, 0], [1, 1]])
+        pass
+
+
+    @property
+    def xrange(self) -> tuple[float, float]:
+        """Min and Max of the x-values."""
+        return self._xrange
+
+    @xrange.setter
+    def xrange(self, xr: tuple[float, float]) -> None:
+        """Set the min and max of the x-values. If min = max, then
+        perform autoxrange. If min > max, then swap them."""
+        self._xrange = xr
+        pass
+
+    @xrange.deleter
+    def xrange(self) -> None:
+        self.xrange = (0, 0)
+        pass
+
+
+    @property
+    def yrange(self) -> tuple[float, float]:
+        """Min and Max of the y-values, for all functions."""
+        return self._yrange
+
+    @yrange.setter
+    def yrange(self, yr: tuple[float, float]) -> None:
+        """Set the min and max of the y-values. If min = max, then
+        perform autoyrange. If min > max, then swap them."""
+        self._yrange = yr
+        pass
+
+    @yrange.deleter
+    def yrange(self) -> None:
+        self.yrange = (0, 0)
+        pass
+
+
+    @property
+    def xlabel(self) -> str:
+        """Short label of x-axis"""
+        return self._xlabel
+
+    @xlabel.setter
+    def xlabel(self, xl: str):
+        self._xlabel = xl
+        pass
+
+    @xlabel.deleter
+    def xlabel(self) -> None:
+        self._xlabel = ""
+        pass
+
+
+    @property
+    def ylabel(self) -> str:
+        """Short label of y-axis"""
+        return self._ylabel
+
+    @ylabel.setter
+    def ylabel(self, yl: str):
+        self._ylabel = yl
+        pass
+
+    @ylabel.deleter
+    def ylabel(self) -> None:
+        self._ylabel = ""
+        pass
+
+
+    @property
+    def xdescr(self) -> str:
+        """Verbose description of x-data."""
+        return self._xdescr
+
+    @xdescr.setter
+    def xdescr(self, xd: str):
+        self._xdescr = xd
+        pass
+
+    @xdescr.deleter
+    def xdescr(self) -> None:
+        self._xdescr = ""
+        pass
+
+
+    @property
+    def ydescr(self) -> str:
+        """Verbose description of y-data."""
+        return self._ydescr
+
+    @ydescr.setter
+    def ydescr(self, yd: str):
+        self._ydescr = yd
+        pass
+
+    @ydescr.deleter
+    def ydescr(self) -> None:
+        self._ydescr = ""
+        pass
+
+
+    @property
+    def line_labels(self) -> list[str]:
+        """List of labels for lines."""
+        return self._line_labels
+
+    @line_labels.setter
+    def line_labels(self, ll: list[str]) -> None:
+        self._line_labels = ll
+        pass
+
+    @line_labels.deleter
+    def line_labels(self) -> None:
+        self._line_labels = ["" for _ in range(self.ysize)]
+        pass
+
+
+    @property
+    def line_descrs(self) -> list[str]:
+        """List of labels for lines."""
+        return self._line_descrs
+
+    @line_descrs.setter
+    def line_descrs(self, ld: list[str]) -> None:
+        self._line_descrs = ld
+        pass
+
+    @line_descrs.deleter
+    def line_descrs(self) -> None:
+        self._line_descrs = ["" for _ in range(self.ysize)]
+        pass
+
+
+    @property
+    def title(self) -> str:
+        """Title of plot."""
+        if self._title:
+            return self._title
+        else:
+            return self.ylabel + " versus " + self.xlabel
+
+    @title.setter
+    def title(self, t: str) -> None:
+        self._title = t
+        pass
+
+    @title.deleter
+    def title(self) -> None:
+        self._title = ""
+        pass
+
+
+    @property
+    def description(self) -> str:
+        """Verbose description of plot."""
+        return self._description
+
+    @description.setter
+    def description(self, d: str) -> None:
+        self._description = d
+        pass
+
+    @description.deleter
+    def description(self) -> None:
+        self._description = ""
+        pass
+
+
+    @property
+    def line_labels(self) -> list[str]:
+        """List of strings of line labels for legend."""
+        if _line_labels:
+            return _line_labels
+        else:
+            ys = self.ysize()
+            if ys > 1:
+                _line_labels = ["Line "+str(i) for i in range(1, ys+1)]
+            else:
+                _line_labels = self.ylabel
+
+    @line_labels.setter
+    def line_labels(self, ll: list[str]) -> None:
+        self._line_labels = ll
+        pass
+
+    @line_labels.deleter
+    def line_labels(self) -> None:
+        _line_labels = []
+        pass
+
+    @property
+    def line_descrs(self) -> list[str]:
+        """List of strings of line descriptions."""
+        return _line_descrs
+
+    @line_descrs.setter
+    def line_descrs(self, ld: list[str]) -> None:
+        self._line_descrs = ld
+        pass
+
+    @line_descrs.deleter
+    def line_descrs(self) -> None:
+        _line_descrs = []
+        pass
+
+
+    @staticmethod
+    def round_range(r: tuple[float, float]) -> float:
+        """Round the min and max down and up to the next round interval"""
+        ad = abs(r[1] - r[0])   # absolute distance from min to max
+        dp = int(math.log10(ad))     # position of decimal point
+        fac = 10^dp                  # factor of decimal point
+        lo = math.floor(r[0] / fac) * fac
+        hi = math.ceil(r[1] / fac) * fac
+        return (lo, hi)        
+                
+    def autoxrange(self) -> None:
+        """Set the min and max of the x values, rounded down and up
+        the order (log10) of the difference between the data min and max."""
+        self._xrange = (0.0, 1.0)
+        pass
+
+    def autoyrange(self) -> None:
+        """Set the min and max of the y values, rounded down and up
+        the order (log10) of the difference between the data min and max."""
+        self._yrange = (0.0, 1.0)
+        pass
+
+    def xsize(self) -> int:
+        """Get n, the x dimension size of the point array."""
+        return 0
+
+    def ysize(self) -> int:
+        """Get m, the number of y functions in the point array."""
+        return 0
+#+end_src
+
+* Class PlotVisual
+
+This class describes and creates the desired visual plot of the data
+described by the PlotData class.
+
+
+** Instance Variables
+
+Instances of this class have the following variables:
+
+- _filetype: one of "png", "gif", or "jpeg"
+- _output: name of the gp and output file, less the file extension
+- _size: tuple of (xpixels, ypixels)
+
+** Class Constants
+
+The class defines the following constants:
+
+- filetypes: list[str]. ["png", "gif", "jpeg", "svg"]
+
+  Considering using class enum.StrEnum from enum.py instead of string.
+#+begin_src python
+import enum
+
+class FileType(enum.StrEnum):
+    PNG = enum.auto()
+    GIF = enum.auto()
+    JPEG = enum.auto()
+    SVG = enum.auto()
+#+end_src
+
+** Properties
+
+This class has the following properties, with automatic getters and
+setters.
+
+- filetype: Type (and extension) of the graphics file. One of "svg", "png", "jpeg", or
+  "gif". The default is "png". If set to another string, the default
+  will be used. The filetype is used to set the filetype of the output of
+  gnuplot and to set the output filename extension.
+
+- output: name of the graphics file and the gp file. If nothing is specified, the
+  title of the plotdata will be used. The filetype will be appended to
+  this string to set the output filename. `.gp` is appended to create
+  the gp filename. May not contain "gp" or one of the filetype strings.
+- size: the x and y size of the graphic in pixels. A tuple (xpixels,
+  ypixels). The default is (640, 480).
+
+** Methods
+
+In addition to property getters and setters, the class has the
+following methods:
+
+- __init__(plotdata: PlotData) -> None: Initialize the PlotVisual object.
+- out_filename() -> str: Get complete output filename assembled from `output`
+  and the selected `filetype`.
+- tsv_filename() -> str: Get the complete tab-separated-values filename
+  assembled from 'output' and '.tsv'
+- gp_filename() -> str: Get complete gnuplot filename assembled from `output` and
+  `.gp`
+- write_tsv() -> None: Write the `.tsv` data points file (with header line).
+- write_gp() -> None: Write the `gp` command file (referencing tsv file).
+- plot_gp() -> None: Plot the `.gp` command file with `gnuplot`.
+
+** Interface
+
+The class must have the following interface:
+
+#+begin_src python :tangle plotvisual_face.py
+"""Temporary Module to document the PlotVisual class."""
+
+import enum
+import math
+import plotdata_face
+
+
+class FileType(enum.StrEnum):
+    """Enumeration of plot graphic file types."""
+
+    PNG = enum.auto()
+    GIF = enum.auto()
+    JPEG = enum.auto()
+    SVG = enum.auto()
+
+
+class PlotVisual(object):
+    """Class to define and visually plot a PlotData object."""
+
+    def __init__(self, pd: PlotData) -> None:
+        """Initialize a visual plot with PlotData."""
+        self._filetype = FileType.PNG
+        self._output = "plot"
+        self._size = (640, 480)
+        pass
+
+    @property
+    def filetype(self) -> FileType:
+        "Type of output file. `png`, `gif`, `jpeg`, or `svg`."
+        return self._filetype
+
+    @filetype.setter
+    def filetype(self, ft: FileType) -> None:
+        self._filetype = ft
+        pass
+
+    @property
+    def output(self) -> str:
+        """Name of output graphic, tsv and gp files."""
+        return self._output
+
+    @output.setter
+    def output(self, out: str) -> None:
+        self._output = out
+        pass
+
+    @property
+    def size(self) -> tuple[int, int]:
+        return self._size
+
+    @size.setter
+    def size(self, s: tuple[int, int]):
+        self._size = s
+        pass
+
+    def out_filename(self) -> str:
+        """Get the output graphic filename from `output` and `filetype`."""
+        return ""
+
+    def tsv_filename(self) -> str:
+        """Get the tab-seperated-values data filename from `output` and `.tsv`."""
+        return ""
+
+    def gp_filename(self) -> str:
+        """Get the gnuplot commands filename from `output` and `.gp`."""
+        return ""
+
+    def write_tsv(self) -> None:
+        """Write the `.tsv` data file with headers and data."""
+        pass
+
+    def write_gp(self) -> None:
+        """Write the `.gp` commands file."""
+        pass
+#+end_src
